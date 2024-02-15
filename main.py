@@ -82,11 +82,33 @@ async def choose(ctx):
 
         # Send list of users who reacted
         react_list = '\n'.join(reacted_users)
-        await ctx.send(f"List of users who reacted:\n{react_list}")
+        await ctx.send(f"Lista terminati:\n{react_list}")
 
         reacted_users.clear()  # Clear the reacted_users list after choosing users
     else:
         await ctx.send("Nu sunt destule reacturi.")
+
+@bot.command(name='biju')
+async def bju(ctx):
+    # Send message asking for reactions
+    react_message = await ctx.send('@everyone bju')
+    # Add verify reaction
+    await react_message.add_reaction('✅')
+
+    # Initialize reaction count
+    reaction_count = 0
+    reacted_users = []  # Reset the reacted_users list
+    while reaction_count < 9:
+        # Wait for reactions
+        reaction, user = await ctx.bot.wait_for('reaction_add')
+        # If the reaction is on the correct message
+        if reaction.message.id == react_message.id and str(reaction.emoji) == '✅':
+            reacted_users.append(user.name)
+            reaction_count += 1
+
+    # Create and send list of users who reacted
+    react_list = '\n'.join(reacted_users)
+    await ctx.send(f"Lista cu reacturile la bju:\n{react_list}")
 
 @client.event
 async def on_command_error(ctx, error):

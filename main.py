@@ -11,20 +11,19 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.reactions = True
 
-client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 reacted_users = []  # Define reacted_users as a global variable
 
-@client.event
+@bot.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    print('We have logged in as {0.user}'.format(bot.user))
 
-@client.event
+@bot.event
 async def on_message(message):
     global reacted_users  # Reference the global variable
 
-    if message.author == client.user:
+    if message.author == bot.user:
         return
 
     if message.content.startswith('$hello'):
@@ -44,7 +43,7 @@ async def pacific(ctx):
     reacted_users = []  # Reset the reacted_users list
     while reaction_count < 21:
         # Wait for reactions
-        reaction, user = await ctx.bot.wait_for('reaction_add')
+        reaction, user = await bot.wait_for('reaction_add')
         # If the reaction is on the correct message
         if reaction.message.id == react_message.id and str(reaction.emoji) == '✅':
             reacted_users.append(user.name)
@@ -55,7 +54,7 @@ async def pacific(ctx):
 
     # Create and send list of users who reacted
     react_list = '\n'.join(reacted_users)
-    await ctx.send(f"List of users who reacted:\n{react_list}")
+    await ctx.send(f"lista:\n{react_list}")
 
 @bot.command()
 async def choose(ctx):
@@ -63,11 +62,11 @@ async def choose(ctx):
 
     if reacted_users:
         chosen_users = random.sample(reacted_users, k=2)
-        await ctx.send(f"The chosen users are: {chosen_users[0]} and {chosen_users[1]}")
+        await ctx.send(f"Seifarii sunt: {chosen_users[0]} and {chosen_users[1]}")
     else:
         await ctx.send("No users reacted to the message yet.")
 
-@client.event
+@bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("Invalid command.")

@@ -3,27 +3,40 @@ import discord
 from discord.ext import commands
 import asyncio
 import random
-from keep_alive import keep_alive
-
-keep_alive()
+from flask import Flask
+from threading import Thread
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.reactions = True
 
+client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 reacted_users = []  # Define reacted_users as a global variable
 
-@bot.event
-async def on_ready():
-    print('We have logged in as {0.user}'.format(bot.user))
+app = Flask('')
 
-@bot.event
+@app.route('/')
+def home():
+    return "<b>Hack The Planet</b>"
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
+@client.event
+async def on_ready():
+    print('We have logged in as {0.user}'.format(client))
+
+@client.event
 async def on_message(message):
     global reacted_users  # Reference the global variable
 
-    if message.author == bot.user:
+    if message.author == client.user:
         return
 
     if message.content.startswith('$hello'):
@@ -41,20 +54,16 @@ async def pacific(ctx):
     # Initialize reaction count
     reaction_count = 0
     reacted_users = []  # Reset the reacted_users list
-
-    try:
-        # Wait for reactions with a timeout of 60 seconds
-        while reaction_count < 21:
-            reaction, user = await bot.wait_for('reaction_add', timeout=60)
-            # If the reaction is on the correct message
-            if reaction.message.id == react_message.id and str(reaction.emoji) == '✅':
-                reacted_users.append(user.name)
-                reaction_count += 1
-            # If someone reacts and they go over the limit, delete their reaction
-            if reaction_count >= 21:
-                await reaction.remove(user)
-    except asyncio.TimeoutError:
-        pass  # Timeout reached, continue execution
+    while reaction_count < 21:
+        # Wait for reactions
+        reaction, user = await ctx.bot.wait_for('reaction_add')
+        # If the reaction is on the correct message
+        if reaction.message.id == react_message.id and str(reaction.emoji) == '✅':
+            reacted_users.append(user.name)
+            reaction_count += 1
+        # If someone reacts and they go over the limit, delete their reaction
+        if reaction_count >= 21:
+            await reaction.remove(user)
 
     # Create and send list of users who reacted
     react_list = '\n'.join(reacted_users)
@@ -67,10 +76,11 @@ async def choose(ctx):
     if reacted_users:
         chosen_users = random.sample(reacted_users, k=2)
         await ctx.send(f"The chosen users are: {chosen_users[0]} and {chosen_users[1]}")
+        reacted_users.clear()  # Clear the reacted_users list after choosing users
     else:
         await ctx.send("No users reacted to the message yet.")
 
-@bot.event
+@client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("Invalid command.")
@@ -79,6 +89,7 @@ try:
     token = os.getenv("TOKEN") or ""
     if token == "":
         raise Exception("Please add your token to the Secrets pane.")
+    keep_alive()  # Start the Flask app
     bot.run(token)
 except discord.HTTPException as e:
     if e.status == 429:

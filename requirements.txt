@@ -1,1 +1,5 @@
 discord.py
+random
+os
+discord
+asyncio

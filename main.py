@@ -41,20 +41,24 @@ async def pacific(ctx):
     # Initialize reaction count
     reaction_count = 0
     reacted_users = []  # Reset the reacted_users list
-    while reaction_count < 21:
-        # Wait for reactions
-        reaction, user = await bot.wait_for('reaction_add')
-        # If the reaction is on the correct message
-        if reaction.message.id == react_message.id and str(reaction.emoji) == '✅':
-            reacted_users.append(user.name)
-            reaction_count += 1
-        # If someone reacts and they go over the limit, delete their reaction
-        if reaction_count >= 21:
-            await reaction.remove(user)
+
+    try:
+        # Wait for reactions with a timeout of 60 seconds
+        while reaction_count < 21:
+            reaction, user = await bot.wait_for('reaction_add', timeout=60)
+            # If the reaction is on the correct message
+            if reaction.message.id == react_message.id and str(reaction.emoji) == '✅':
+                reacted_users.append(user.name)
+                reaction_count += 1
+            # If someone reacts and they go over the limit, delete their reaction
+            if reaction_count >= 21:
+                await reaction.remove(user)
+    except asyncio.TimeoutError:
+        pass  # Timeout reached, continue execution
 
     # Create and send list of users who reacted
     react_list = '\n'.join(reacted_users)
-    await ctx.send(f"lista:\n{react_list}")
+    await ctx.send(f"List of users who reacted:\n{react_list}")
 
 @bot.command()
 async def choose(ctx):
@@ -62,7 +66,7 @@ async def choose(ctx):
 
     if reacted_users:
         chosen_users = random.sample(reacted_users, k=2)
-        await ctx.send(f"Seifarii sunt: {chosen_users[0]} and {chosen_users[1]}")
+        await ctx.send(f"The chosen users are: {chosen_users[0]} and {chosen_users[1]}")
     else:
         await ctx.send("No users reacted to the message yet.")
 

@@ -42,7 +42,10 @@ async def on_message(message):
     if message.content.startswith('$hello'):
         await message.channel.send('Hello!')
 
-@bot.command()
+    if message.content.startswith('!'):
+        await message.delete()  # Delete the user's message if it starts with '!'
+
+@bot.command(name='pacific')
 async def pacific(ctx):
     global reacted_users  # Reference the global variable
 
@@ -67,18 +70,23 @@ async def pacific(ctx):
 
     # Create and send list of users who reacted
     react_list = '\n'.join(reacted_users)
-    await ctx.send(f"List of users who reacted:\n{react_list}")
+    await ctx.send(f"Lista cu reacturile:\n{react_list}")
 
-@bot.command()
+@bot.command(name='seif')
 async def choose(ctx):
     global reacted_users  # Reference the global variable
 
-    if reacted_users:
+    if len(reacted_users) >= 2:  # Check if there are at least 2 users to choose from
         chosen_users = random.sample(reacted_users, k=2)
-        await ctx.send(f"The chosen users are: {chosen_users[0]} and {chosen_users[1]}")
+        await ctx.send(f"Seifarii sunt: {chosen_users[0]} and {chosen_users[1]}")
+
+        # Send list of users who reacted
+        react_list = '\n'.join(reacted_users)
+        await ctx.send(f"List of users who reacted:\n{react_list}")
+
         reacted_users.clear()  # Clear the reacted_users list after choosing users
     else:
-        await ctx.send("No users reacted to the message yet.")
+        await ctx.send("Nu sunt destule reacturi.")
 
 @client.event
 async def on_command_error(ctx, error):

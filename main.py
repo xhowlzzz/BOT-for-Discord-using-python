@@ -18,7 +18,7 @@ name_list = []
 @bot.command()
 async def pacific(ctx):
     global name_list
-    embed = discord.Embed(title="Jaf Pacific", description="Bifeaza pentru Jaf Pacific", color=0x00ff00)
+    embed = discord.Embed(title="Jaf Pacific", description="React with ✅ to add your name or ❌ to remove it from the list", color=0x00ff00)
     message = await ctx.send(embed=embed)
 
     def check(reaction, user):
@@ -35,13 +35,13 @@ async def pacific(ctx):
         elif str(reaction.emoji) == '❌':
             if user.display_name in name_list:
                 name_list.remove(user.display_name)
-
+        
         await update_message(message)
 
 async def update_message(message):
     global name_list
-    embed = discord.Embed(title="Jaf Pacific", description="Bifeaza pentru Jaf Pacific", color=0x00ff00)
-    embed.add_field(name="Lista", value="\n".join(name_list) if name_list else "Momentan nu e nimeni pe lista.")
+    embed = discord.Embed(title="Jaf Pacific", description="React with ✅ to add your name or ❌ to remove it from the list", color=0x00ff00)
+    embed.add_field(name="Names", value="\n".join(name_list) if name_list else "No names in the list")
     await message.edit(embed=embed)
 
 # Command to choose 2 random names from the list and send a message
@@ -49,12 +49,11 @@ async def update_message(message):
 async def seif(ctx):
     global name_list
     if len(name_list) < 2:
-        await ctx.send("Nu sunt destule nume in lista.")
+        await ctx.send("There are not enough names in the list.")
         return
 
     chosen_names = random.sample(name_list, 2)
     await ctx.send(f"Seifarii sunt: {chosen_names[0]} și {chosen_names[1]}")
-
 
 # Run the bot
 bot.run('token')

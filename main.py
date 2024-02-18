@@ -57,4 +57,4 @@ async def seif(ctx):
 
 
 # Run the bot
-bot.run('MTIwODU4MjEyMDM4NjIwNzc0NA.GitQ4M.mRxnDE6kGJYdehctRtZ51K2lOlBRI5Wp-b9Ano')
+bot.run('token')
